@@ -5,7 +5,7 @@
   "version": "1.1.0",
   "description": "为 MoeKoe Music 添加歌曲下载功能。支持单曲下载和歌单批量下载（选择目录后零对话框），自动识别音质扩展名。",
   "author": "Malk",
-  "minversion": "1.6.5",
+  "minversion": "1.6.2",
   "moekoe": true,
   "permissions": [],
   "host_permissions": ["<all_urls>", "file:///*"],

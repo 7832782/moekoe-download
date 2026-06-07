@@ -73,7 +73,7 @@ kugou-download/
 
 ## 兼容性
 
-- 需要 **MoeKoe Music ≥ 1.6.5**
+- 需要 **MoeKoe Music ≥ 1.6.2**
 - 仅供个人学习使用
 
 ## 许可

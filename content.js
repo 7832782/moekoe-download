@@ -45,7 +45,8 @@
     if (!url) return 'mp3';
     var m = url.match(/\.(mp3|flac|aac|ogg|wav|mp4|webm|ape)(\?|$)/i);
     if (m) return m[1].toLowerCase();
-    var badge = document.querySelector('.quality-badge');
+    var player = document.querySelector('.player-container');
+    var badge = player ? player.querySelector('.quality-badge') : null;
     if (badge) {
       var t = badge.textContent.trim();
       if (t.indexOf('FLAC') !== -1 || t.indexOf('Hi-Res') !== -1 || t.indexOf('母带') !== -1) return 'flac';
@@ -55,8 +56,9 @@
   }
 
   function getSongMeta() {
-    var title = document.querySelector('.song-title');
-    var artist = document.querySelector('.artist');
+    var player = document.querySelector('.player-container');
+    var title = player ? player.querySelector('.song-title') : null;
+    var artist = player ? player.querySelector('.artist') : null;
     return {
       name: title ? title.textContent.trim() : '未知歌曲',
       artist: artist ? artist.textContent.trim() : '未知艺术家'
@@ -402,6 +404,14 @@
     if (container && !document.querySelector('.moekoe-download-btn')) {
       var btn = document.createElement('button');
       btn.className = 'extra-btn moekoe-download-btn';
+      // 拷贝已有 extra-btn 的 Vue scoped 属性，确保样式匹配
+      var refBtn = container.querySelector('.extra-btn');
+      if (refBtn) {
+        for (var i = 0; i < refBtn.attributes.length; i++) {
+          var attr = refBtn.attributes[i];
+          if (attr.name.startsWith('data-v-')) btn.setAttribute(attr.name, '');
+        }
+      }
       btn.title = '下载歌曲';
       btn.innerHTML = '<i class="fas fa-download"></i>';
       btn.addEventListener('click', onDownload);

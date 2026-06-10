@@ -120,15 +120,24 @@
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     }).then(function (d) {
-      if (d && d.url && Array.isArray(d.url) && d.url[0]) return d.url[0];
-      if (d && d.data && d.data.url) return d.data.url;
+      var u = null;
+      if (d && d.url && Array.isArray(d.url) && d.url[0]) u = d.url[0];
+      else if (d && d.data && d.data.url) u = d.data.url;
+      if (u) return { url: u, quality: quality };
       throw new Error('响应中未找到音频 URL');
     }).catch(function (err) {
-      // 逐级降级：当前品质不可用时尝试低一档
       var idx = QUALITY_CHAIN.indexOf(quality);
       if (idx > 0) return fetchSongUrl(hash, QUALITY_CHAIN[idx - 1]);
       throw err;
     });
+  }
+
+  function buildFilename(qlabel, name, author, ext) {
+    var parts = [];
+    if (qlabel) parts.push(qlabel);
+    if (name) parts.push(name);
+    if (author) parts.push(author);
+    return sanitize(parts.join(' - ')) + '.' + ext;
   }
 
   // =============================================
@@ -148,8 +157,12 @@
     }
     var meta = getSongMeta();
     var ext = getExtension(url);
-    var qlabel = QUALITY_LABELS[getPreferredQuality()] || '';
-    var filename = sanitize((qlabel ? qlabel + ' - ' : '') + meta.name + ' - ' + meta.artist) + '.' + ext;
+    // 从播放器音质徽章获取实际品质标签
+    var badgeText = '';
+    var playerEl = document.querySelector('.player-container');
+    var badge = playerEl ? playerEl.querySelector('.quality-badge') : null;
+    if (badge) badgeText = badge.textContent.trim();
+    var filename = buildFilename(badgeText, meta.name, meta.artist, ext);
 
     var btn = document.querySelector('.moekoe-download-btn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>'; }
@@ -297,16 +310,16 @@
     var song = BATCH.songs[BATCH.index];
     updateBatchBtn(BATCH.btn, (BATCH.index + 1) + '/' + BATCH.songs.length + ' ' + song.name);
 
-    fetchSongUrl(song.hash, BATCH.quality).then(function (audioUrl) {
+    fetchSongUrl(song.hash, BATCH.quality).then(function (res) {
       if (BATCH.state === 'paused') return;
-      return fetch(audioUrl).then(function (r) {
+      return fetch(res.url).then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.blob();
       }).then(function (blob) {
         if (BATCH.state === 'paused') return;
-        var ext = getExtension(audioUrl);
-        var qlabel = QUALITY_LABELS[BATCH.quality] || '';
-        var name = sanitize((qlabel ? qlabel + ' - ' : '') + song.name + ' - ' + song.author) + '.' + ext;
+        var ext = getExtension(res.url);
+        var qlabel = QUALITY_LABELS[res.quality] || '';
+        var name = buildFilename(qlabel, song.name, song.author, ext);
         return new Promise(function (resolve, reject) {
           delete document.documentElement.dataset.moekoeFSAWritten;
           delete document.documentElement.dataset.moekoeFSAError;
@@ -390,14 +403,14 @@
       var song = songs[i];
       updateBatchBtn(btn, (i + 1) + '/' + songs.length + ' ' + song.name);
 
-      fetchSongUrl(song.hash, quality).then(function (audioUrl) {
-        return fetch(audioUrl).then(function (r) {
+      fetchSongUrl(song.hash, quality).then(function (res) {
+        return fetch(res.url).then(function (r) {
           if (!r.ok) throw new Error('HTTP ' + r.status);
           return r.blob();
         }).then(function (blob) {
-          var ext = getExtension(audioUrl);
-          var qlabel = QUALITY_LABELS[BATCH.quality] || '';
-          var name = sanitize((qlabel ? qlabel + ' - ' : '') + song.name + ' - ' + song.author) + '.' + ext;
+          var ext = getExtension(res.url);
+          var qlabel = QUALITY_LABELS[res.quality] || '';
+          var name = buildFilename(qlabel, song.name, song.author, ext);
           triggerBlobDownload(blob, name);
           success++;
         });

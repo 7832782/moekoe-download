@@ -100,6 +100,17 @@
     }
   }
 
+  var QUALITY_CHAIN = ['high', 'viper_atmos', 'viper_clear', 'viper_tape', 'flac', '320', '128'];
+  var QUALITY_LABELS = {
+    '128': '标准',
+    '320': '高品',
+    flac: 'FLAC',
+    high: 'Hi-Res',
+    viper_atmos: '全景声',
+    viper_clear: '超清',
+    viper_tape: '母带'
+  };
+
   function fetchSongUrl(hash, quality) {
     var auth = buildAuthHeader();
     var url = API_BASE + '/song/url?hash=' + encodeURIComponent(hash) + '&quality=' + encodeURIComponent(quality);
@@ -113,7 +124,9 @@
       if (d && d.data && d.data.url) return d.data.url;
       throw new Error('响应中未找到音频 URL');
     }).catch(function (err) {
-      if (quality !== '128') return fetchSongUrl(hash, '128');
+      // 逐级降级：当前品质不可用时尝试低一档
+      var idx = QUALITY_CHAIN.indexOf(quality);
+      if (idx > 0) return fetchSongUrl(hash, QUALITY_CHAIN[idx - 1]);
       throw err;
     });
   }
@@ -429,12 +442,10 @@
         var sel = document.createElement('select');
         sel.className = 'moekoe-quality-select';
         var opts = [
-          { value: '128', label: '标准 128kbps' },
-          { value: '320', label: '高品 320kbps' },
-          { value: 'flac', label: 'FLAC' },
           { value: 'high', label: 'Hi-Res' },
-          { value: 'viper_atmos', label: '全景声' },
-          { value: 'viper_clear', label: '超清' }
+          { value: 'flac', label: 'FLAC' },
+          { value: '320', label: '高品' },
+          { value: '128', label: '标准' }
         ];
         var current = getPreferredQuality();
         opts.forEach(function (o) {

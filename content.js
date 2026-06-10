@@ -429,10 +429,12 @@
         var sel = document.createElement('select');
         sel.className = 'moekoe-quality-select';
         var opts = [
-          { value: '128', label: '128kbps' },
-          { value: '320', label: '320kbps' },
+          { value: '128', label: '标准 128kbps' },
+          { value: '320', label: '高品 320kbps' },
           { value: 'flac', label: 'FLAC' },
-          { value: 'hires', label: 'Hi-Res' }
+          { value: 'high', label: 'Hi-Res' },
+          { value: 'viper_atmos', label: '全景声' },
+          { value: 'viper_clear', label: '超清' }
         ];
         var current = getPreferredQuality();
         opts.forEach(function (o) {

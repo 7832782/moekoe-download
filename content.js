@@ -148,7 +148,8 @@
     }
     var meta = getSongMeta();
     var ext = getExtension(url);
-    var filename = sanitize(meta.name + ' - ' + meta.artist) + '.' + ext;
+    var qlabel = QUALITY_LABELS[getPreferredQuality()] || '';
+    var filename = sanitize((qlabel ? qlabel + ' - ' : '') + meta.name + ' - ' + meta.artist) + '.' + ext;
 
     var btn = document.querySelector('.moekoe-download-btn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>'; }
@@ -304,7 +305,8 @@
       }).then(function (blob) {
         if (BATCH.state === 'paused') return;
         var ext = getExtension(audioUrl);
-        var name = sanitize(song.name + ' - ' + song.author) + '.' + ext;
+        var qlabel = QUALITY_LABELS[BATCH.quality] || '';
+        var name = sanitize((qlabel ? qlabel + ' - ' : '') + song.name + ' - ' + song.author) + '.' + ext;
         return new Promise(function (resolve, reject) {
           delete document.documentElement.dataset.moekoeFSAWritten;
           delete document.documentElement.dataset.moekoeFSAError;
@@ -394,7 +396,8 @@
           return r.blob();
         }).then(function (blob) {
           var ext = getExtension(audioUrl);
-          var name = sanitize(song.name + ' - ' + song.author) + '.' + ext;
+          var qlabel = QUALITY_LABELS[BATCH.quality] || '';
+          var name = sanitize((qlabel ? qlabel + ' - ' : '') + song.name + ' - ' + song.author) + '.' + ext;
           triggerBlobDownload(blob, name);
           success++;
         });

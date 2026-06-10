@@ -422,6 +422,38 @@
     // 批量下载
     var actions = document.querySelector('.track-list-actions');
     if (actions && !document.querySelector('.moekoe-batch-btn')) {
+      var searchInput = actions.querySelector('.search-input');
+
+      // 音质选择器
+      if (!document.querySelector('.moekoe-quality-select')) {
+        var sel = document.createElement('select');
+        sel.className = 'moekoe-quality-select';
+        var opts = [
+          { value: '128', label: '128kbps' },
+          { value: '320', label: '320kbps' },
+          { value: 'flac', label: 'FLAC' },
+          { value: 'hires', label: 'Hi-Res' }
+        ];
+        var current = getPreferredQuality();
+        opts.forEach(function (o) {
+          var opt = document.createElement('option');
+          opt.value = o.value;
+          opt.textContent = o.label;
+          if (o.value === current) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener('change', function () {
+          try {
+            var s = JSON.parse(localStorage.getItem('settings') || '{}');
+            s.quality = sel.value;
+            localStorage.setItem('settings', JSON.stringify(s));
+          } catch (e) {}
+        });
+        sel.title = '选择下载音质';
+        if (searchInput) actions.insertBefore(sel, searchInput);
+        else actions.appendChild(sel);
+      }
+
       var batchBtn = document.createElement('button');
       batchBtn.className = 'moekoe-batch-btn';
       batchBtn.textContent = '下载全部';
@@ -435,7 +467,6 @@
       batchBtn.addEventListener('mouseenter', function () { this.style.opacity = '0.8'; });
       batchBtn.addEventListener('mouseleave', function () { this.style.opacity = '1'; });
       batchBtn.addEventListener('click', onBatchDownload);
-      var searchInput = actions.querySelector('.search-input');
       if (searchInput) actions.insertBefore(batchBtn, searchInput);
       else actions.appendChild(batchBtn);
       console.log('[MoeKoe Download] 批量下载按钮已添加');
@@ -452,7 +483,13 @@
     style.textContent =
       '.moekoe-download-btn:disabled{opacity:0.6;cursor:not-allowed}' +
       '.moekoe-batch-btn:hover{opacity:0.8}' +
-      '.moekoe-batch-btn:active{opacity:0.6}';
+      '.moekoe-batch-btn:active{opacity:0.6}' +
+      '.moekoe-quality-select{background:transparent;border:1px solid var(--secondary-color,#888);' +
+      'border-radius:5px;color:var(--text-color,inherit);font-size:13px;' +
+      'padding:4px 6px;cursor:pointer;margin-right:6px;' +
+      'outline:none;transition:all 0.3s ease;' +
+      'max-width:100px}' +
+      '.moekoe-quality-select:hover{opacity:0.8}';
     document.head.appendChild(style);
   }
 

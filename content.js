@@ -100,7 +100,7 @@
     }
   }
 
-  var QUALITY_CHAIN = ['high', 'viper_atmos', 'viper_clear', 'viper_tape', 'flac', '320', '128'];
+  var QUALITY_CHAIN = ['128', '320', 'flac', 'high', 'viper_atmos', 'viper_clear', 'viper_tape'];
   var QUALITY_LABELS = {
     '128': '标准',
     '320': '高品',

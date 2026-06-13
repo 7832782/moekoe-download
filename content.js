@@ -388,7 +388,12 @@
       var name = s.name || '';
       var author = s.author || '';
       var album = s.album || '';
-      lines.push(name + '-' + author + '-' + album);
+      // 有些接口把 "歌手 - 歌名" 合在 name 里，author 为空
+      var parts = [];
+      if (name) parts.push(name);
+      if (author) parts.push(author);
+      if (album) parts.push(album);
+      lines.push(parts.join('-'));
     });
     var content = lines.join('\n');
 

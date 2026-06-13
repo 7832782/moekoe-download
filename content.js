@@ -376,6 +376,20 @@
   // =============================================
   //  6. 导出歌单为 txt
   // =============================================
+  function getPlaylistName() {
+    var el =
+      document.querySelector('.playlist-info .title') ||
+      document.querySelector('.playlist-header .name') ||
+      document.querySelector('.page-header h1') ||
+      document.querySelector('.playlist-name') ||
+      document.querySelector('.list-title');
+    if (el) return el.textContent.trim().replace(/[<>:"/\\|?*]/g, '_').replace(/\s+/g, ' ').trim() || '歌单';
+    // 从页标题取
+    var t = document.title.replace(/ - .*$/, '').trim();
+    if (t && t !== 'MoeKoeMusic') return t;
+    return '歌单';
+  }
+
   function onExportPlaylist() {
     var raw = document.documentElement.dataset.moekoeSongs || '';
     if (!raw) { alert('未获取到歌单数据。请先打开一个歌单页面，等待加载完成后重试。'); return; }
@@ -423,7 +437,7 @@
     var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     var now = new Date();
     var dateStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
-    var filename = '歌单_' + dateStr + '.txt';
+    var filename = getPlaylistName() + '_' + dateStr + '.txt';
     triggerBlobDownload(blob, filename);
   }
 

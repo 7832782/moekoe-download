@@ -398,9 +398,15 @@
 
     var lines = [];
     songs.forEach(function (s) {
-      var songName = s.songname || s.SongName || s.song_name || s.audio_name || (s.base && s.base.audio_name) || s.name || '';
-      var artist = s.singername || s.SingerName || s.singer_name || s.author_name || (s.base && s.base.author_name) || s.author || '';
-      var album = s.album_name || s.AlbumName || s.albumname || s.album || (s.base && s.base.album_name) || '';
+      var songName = s.name || '';
+      var artist = s.author || '';
+      var album = s.album || '';
+      // 兼容旧数据：如果含 " - " 而 author 为空，拆成 歌手/歌名
+      if (!artist && songName.indexOf(' - ') !== -1) {
+        var split = songName.split(' - ');
+        artist = split.slice(0, -1).join(' - ').trim();
+        songName = split[split.length - 1].trim();
+      }
       // 从 DOM 补专辑名
       if (!album) {
         var key = (songName + '|' + artist).toLowerCase();

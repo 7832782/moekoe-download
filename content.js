@@ -378,6 +378,8 @@
   // =============================================
   function getPlaylistName() {
     var el =
+      document.querySelector('.info .title') ||
+      document.querySelector('.info h1') ||
       document.querySelector('.playlist-info .title') ||
       document.querySelector('.playlist-header .name') ||
       document.querySelector('.page-header h1') ||

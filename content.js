@@ -383,15 +383,32 @@
     try { songs = JSON.parse(raw); } catch(e) { songs = null; }
     if (!songs || !songs.length) { alert('歌单数据为空'); return; }
 
+    // 从 DOM 中读取可见歌曲的专辑名，按 (歌名,歌手) 匹配补充
+    var domAlbums = {};
+    var domItems = document.querySelectorAll('.cover-view');
+    domItems.forEach(function (item) {
+      var titleEl = item.querySelector('.track-title-text');
+      var artistEl = item.querySelector('.track-artist');
+      var albumEl = item.querySelector('.track-album');
+      if (titleEl && artistEl && albumEl) {
+        var key = (titleEl.textContent.trim() + '|' + artistEl.textContent.trim()).toLowerCase();
+        domAlbums[key] = albumEl.textContent.trim();
+      }
+    });
+
     var lines = [];
     songs.forEach(function (s) {
-      var name = s.name || '';
-      var author = s.author || '';
-      var album = s.album || '';
-      // 有些接口把 "歌手 - 歌名" 合在 name 里，author 为空
+      var songName = s.songname || s.SongName || s.song_name || s.audio_name || (s.base && s.base.audio_name) || s.name || '';
+      var artist = s.singername || s.SingerName || s.singer_name || s.author_name || (s.base && s.base.author_name) || s.author || '';
+      var album = s.album_name || s.AlbumName || s.albumname || s.album || (s.base && s.base.album_name) || '';
+      // 从 DOM 补专辑名
+      if (!album) {
+        var key = (songName + '|' + artist).toLowerCase();
+        if (domAlbums[key]) album = domAlbums[key];
+      }
       var parts = [];
-      if (name) parts.push(name);
-      if (author) parts.push(author);
+      if (songName) parts.push(songName);
+      if (artist) parts.push(artist);
       if (album) parts.push(album);
       lines.push(parts.join('-'));
     });

@@ -373,6 +373,34 @@
     window.postMessage({ type: 'MOEKOE_FSA_WRITE', filename: filename, blob: blob }, '*');
   }
 
+  // =============================================
+  //  6. 导出歌单为 txt
+  // =============================================
+  function onExportPlaylist() {
+    var raw = document.documentElement.dataset.moekoeSongs || '';
+    if (!raw) { alert('未获取到歌单数据。请先打开一个歌单页面，等待加载完成后重试。'); return; }
+    var songs;
+    try { songs = JSON.parse(raw); } catch(e) { songs = null; }
+    if (!songs || !songs.length) { alert('歌单数据为空'); return; }
+
+    var lines = [];
+    songs.forEach(function (s) {
+      var name = s.name || '';
+      var author = s.author || '';
+      var album = s.album || '';
+      lines.push(name + '-' + author + '-' + album);
+    });
+    var content = lines.join('\n');
+
+    var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    var now = new Date();
+    var dateStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+    var filename = '歌单_' + dateStr + '.txt';
+    triggerBlobDownload(blob, filename);
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
   // ---- 5b. 回退：逐个 <a download> ----
   function batchDownloadLegacy(songs) {
     if (songs.length > 50 && !confirm('该歌单有 ' + songs.length + ' 首歌，确认开始下载？')) return;
@@ -417,7 +445,7 @@
   }
 
   // =============================================
-  //  6. 注入所有按钮
+  //  7. 注入所有按钮
   // =============================================
   function addButtons() {
     // 单曲下载
@@ -492,10 +520,29 @@
       else actions.appendChild(batchBtn);
       console.log('[MoeKoe Download] 批量下载按钮已添加');
     }
+
+    // 导出歌单
+    var actions2 = document.querySelector('.track-list-actions');
+    if (actions2 && !document.querySelector('.moekoe-export-btn')) {
+      var exportBtn = document.createElement('button');
+      exportBtn.className = 'moekoe-export-btn';
+      exportBtn.textContent = '📋 导出歌单';
+      exportBtn.title = '导出当前歌单为 txt';
+      exportBtn.style.cssText =
+        'background:transparent;border:1px solid var(--secondary-color,#888);' +
+        'padding:5px 12px;border-radius:5px;cursor:pointer;' +
+        'color:var(--text-color,inherit);font-size:13px;white-space:nowrap;' +
+        'display:inline-flex;align-items:center;transition:all 0.3s ease;';
+      exportBtn.addEventListener('mouseenter', function () { this.style.opacity = '0.8'; });
+      exportBtn.addEventListener('mouseleave', function () { this.style.opacity = '1'; });
+      exportBtn.addEventListener('click', onExportPlaylist);
+      actions2.appendChild(exportBtn);
+      console.log('[MoeKoe Download] 导出歌单按钮已添加');
+    }
   }
 
   // =============================================
-  //  7. 样式
+  //  8. 样式
   // =============================================
   function injectStyle() {
     if (document.querySelector('#moekoe-download-style')) return;
@@ -510,12 +557,14 @@
       'padding:4px 6px;cursor:pointer;margin-right:6px;' +
       'outline:none;transition:all 0.3s ease;' +
       'max-width:100px}' +
-      '.moekoe-quality-select:hover{opacity:0.8}';
+      '.moekoe-quality-select:hover{opacity:0.8}' +
+      '.moekoe-export-btn:hover{opacity:0.8}' +
+      '.moekoe-export-btn:active{opacity:0.6}';
     document.head.appendChild(style);
   }
 
   // =============================================
-  //  8. 持续监听 DOM 变化
+  //  9. 持续监听 DOM 变化
   // =============================================
   function startObserver() {
     addButtons();
@@ -525,7 +574,7 @@
   }
 
   // =============================================
-  //  Init
+  //  10. Init
   // =============================================
   injectHook();
   injectStyle();

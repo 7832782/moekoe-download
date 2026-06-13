@@ -19,6 +19,7 @@
         hash: s.hash || (s.audio_info && s.audio_info.hash) || s.FileHash || '',
         name: s.name || s.audio_name || (s.base && s.base.audio_name) || s.SongName || '',
         author: s.author || s.author_name || (s.base && s.base.author_name) || s.SingerName || '',
+        album: s.album_name || s.album || (s.base && s.base.album_name) || s.AlbumName || '',
         timelen: s.timelen || s.timelength || (s.audio_info && s.audio_info.duration) || 0
       };
     }).filter(function (s) { return s.hash && s.name; });
